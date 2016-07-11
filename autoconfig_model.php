@@ -34,6 +34,7 @@ class AutoConfig
     // GET DEVICE LIST
     // ------------------------------------------------------------------------------------------------------------------------------------------------------
     public function get_device_list($userid) {
+        $userid = (int) $userid;
         $devices = $this->devices;
         $inputs = $this->input->getlist($userid);
         
@@ -47,11 +48,19 @@ class AutoConfig
             foreach ($devices as $devicekey=>$device) {
                 // Check if device has been configured
                 $devices[$devicekey]["configured"] = false;
-                $result = $this->mysqli->query("SELECT * FROM autoconfig WHERE device='$devicekey' AND userid='$userid'");
-                if ($result->num_rows) {
-                    $row = $result->fetch_object();
-                    $devices[$devicekey]["configured"] = $row->configuration;
+                
+                $stmt = $this->mysqli->prepare("SELECT configuration FROM autoconfig WHERE device=? AND userid=?");
+                $stmt->bind_param("si", $devicekey, $userid);
+                $stmt->execute();
+                $stmt->store_result();
+               
+                if ($stmt->num_rows) {
+                    $stmt->bind_result($configuration);
+                    $stmt->fetch();
+                    
+                    $devices[$devicekey]["configured"] = $configuration;
                 }
+                $stmt->close();
                 
                 // Load device inputs if present
                 foreach ($devices[$devicekey]["inputnames"] as $inputname) {
@@ -83,6 +92,7 @@ class AutoConfig
     // VERIFY
     // ------------------------------------------------------------------------------------------------------------------------------------------------------
     private function verify($userid,$devices) {
+        $userid = (int) $userid;
         // Verify configuration
         foreach ($devices as $devicekey=>$device) {
             $verify = true;
@@ -154,18 +164,31 @@ class AutoConfig
     // ------------------------------------------------------------------------------------------------------------------------------------------------------
     public function configure($userid,$device,$configuration) {
         $userid = (int) $userid;
+        $device_out = preg_replace('/[^\p{N}\p{L}_\s-]/u','',$device);
+        if ($device_out!=$device) return false;
+        $configuration_out = preg_replace('/[^\p{N}\p{L}_\s-]/u','',$configuration);
+        if ($configuration_out!=$configuration) return false;
         
         // ------------------------------------------
         // Save configuration to autoconfig database
-        $result = $this->mysqli->query("SELECT * FROM autoconfig WHERE device='$device' AND userid='$userid'");
-        if ($result->num_rows==1) {
+        
+        $stmt = $this->mysqli->prepare("SELECT * FROM autoconfig WHERE device=? AND userid=?");
+        $stmt->bind_param("si", $device, $userid);
+        $stmt->execute();
+        $stmt->store_result();
+                
+        if ($stmt->num_rows==1) {
+            $stmt->close();
             $stmt = $this->mysqli->prepare("UPDATE autoconfig SET configuration=? WHERE device=? AND userid=?");
             $stmt->bind_param("ssi", $configuration, $device, $userid);
             $stmt->execute();
+            $stmt->close();
         } else {
+            $stmt->close();
             $stmt = $this->mysqli->prepare("INSERT INTO autoconfig (userid,device,configuration) VALUES (?,?,?)");
             $stmt->bind_param("iss", $userid, $device, $configuration);
             $stmt->execute();
+            $stmt->close();
         }
         // ------------------------------------------
         
