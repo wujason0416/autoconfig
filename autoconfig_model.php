@@ -106,6 +106,9 @@ class AutoConfig
                                     if ($process['process']=="log_to_feed") {
                                         if ($processid!=1) { $verify = false; $verifylog .= "- Expected log_to_feed (1) found processid:$processid<br>"; }
                                     }
+                                    if ($process['process']=="wh_accumulator") {
+                                        if ($processid!=34) { $verify = false; $verifylog .= "- Expected wh_accumulator (34) found processid:$processid<br>"; }
+                                    }
                                     if ($process['process']=="power_to_kwh") {
                                         if ($processid!=4) { $verify = false; $verifylog = "- Expected power_to_kwh (4) found processid:$processid<br>"; }
                                     }
@@ -115,12 +118,18 @@ class AutoConfig
                                     if ($process['process']=="allow_positive") {
                                         if ($processid!=24) { $verify = false; $verifylog .= "- Expected allow_positive (44) found processid:$processid<br>"; } 
                                     }
+                                    if ($process['process']=="multiply") {
+                                        if ($processid!=2) { $verify = false; $verifylog .= "- Expected multiply (2) found processid:$processid<br>"; } 
+                                    }
                                 } else {
                                     $verify = false;
                                     $verifylog .= "- Missing process <b>".$process['process']."</b> on input <b>$inputname</b><br>"; 
                                 }
                                 
                                 if ($process['process']=="log_to_feed") { 
+                                    if (!$this->feed->get_id($userid,$process['feedname'])) { $verify = false; $verifylog .= "- Missing feed <b>".$process['feedname']."</b><br>"; } 
+                                }
+                                if ($process['process']=="wh_accumulator") { 
                                     if (!$this->feed->get_id($userid,$process['feedname'])) { $verify = false; $verifylog .= "- Missing feed <b>".$process['feedname']."</b><br>"; } 
                                 }
                                 if ($process['process']=="power_to_kwh") {
@@ -210,6 +219,24 @@ class AutoConfig
                                 }
                                 
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
+                                // Log to feed
+                                // ------------------------------------------------------------------------------------------------------------------------------------------------------
+                                if ($process['process']=="wh_accumulator") {
+                                    // Check to see if feed exists
+                                    if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
+                                        $log .= "- creating feed ".$process['feedname'].": ";
+                                        $result = $this->feed->create($userid,"",$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        if ($result["success"]) {
+                                            $log .= "ok\n";
+                                            $feedid = $result["feedid"];
+                                        }
+                                    }
+                                    $log .= "- add wh_accumulator process to input: ";
+                                    $result = $this->process_add($this->input,$inp['id'],34,$feedid); // processid:34 wh_accumulator
+                                    if ($result["success"]) $log .= "ok\n";
+                                }
+                                
+                                // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // power to kwh
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 if ($process['process']=="power_to_kwh") {
@@ -243,6 +270,15 @@ class AutoConfig
                                 if ($process['process']=="allow_positive") {
                                     $log .= "- add allow_positive process to input: ";
                                     $result = $this->process_add($this->input,$inp['id'],24,null);
+                                    if ($result["success"]) $log .= "ok\n";
+                                }
+                                
+                                // ------------------------------------------------------------------------------------------------------------------------------------------------------
+                                // multiply
+                                // ------------------------------------------------------------------------------------------------------------------------------------------------------
+                                if ($process['process']=="multiply") {
+                                    $log .= "- add multiply process to input: ";
+                                    $result = $this->process_add($this->input,$inp['id'],2,$process["value"]);
                                     if ($result["success"]) $log .= "ok\n";
                                 }
                                 

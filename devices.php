@@ -56,6 +56,90 @@ function get_devices() {
         // Available configurations
         "configurations"=>array()
     );
+    
+    $devices["heatpumpmonitor"] = array(
+        "name"=>"Heatpump Monitor",
+        "description"=>"ESP WIFI Heatpump Monitor",
+        "nodename"=>"0",
+        "inputnames"=>array("OEMct1","OEMct1Wh","KSheat","KSflowT","KSreturnT","KSkWh","WattHours"),
+        "inputs"=>array(),
+        // Available configurations
+        "configurations"=>array(
+            // Home Energy Monitoring 
+            "hpconfig1"=>array(
+                "name"=>"OEM CT1 + Kamstrup 402 MBUS", 
+                "image"=>"HeatpumpMonitor.png", 
+                "inputprocessing"=>array(
+                    "OEMct1"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_elec")
+                    ),
+                    "OEMct1Wh"=>array(
+                        array("process"=>"multiply", "value"=>0.001),
+                        array("process"=>"wh_accumulator", "feedname"=>"heatpump_elec_kwh")
+                    ),
+                    "KSheat"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_heat"),
+                        array("process"=>"power_to_kwh", "feedname"=>"heatpump_heat_kwh")
+                    ),
+                    "KSflowT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_flowT")
+                    ),
+                    "KSreturnT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_returnT")
+                    ),
+                    "KSkWh"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"KSkWh")
+                    )
+                )
+            ),
+            "hpconfig2"=>array(
+                "name"=>"Elster A100C IRDA + Kamstrup 402 MBUS", 
+                "image"=>"HeatpumpMonitor.png", 
+                "inputprocessing"=>array(
+                    "WattHours"=>array(
+                        array("process"=>"multiply", "value"=>0.001),
+                        array("process"=>"wh_accumulator", "feedname"=>"heatpump_elec_kwh")
+                    ),
+                    "KSheat"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_heat"),
+                        array("process"=>"power_to_kwh", "feedname"=>"heatpump_heat_kwh")
+                    ),
+                    "KSflowT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_flowT")
+                    ),
+                    "KSreturnT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_returnT")
+                    ),
+                    "KSkWh"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"KSkWh")
+                    )
+                )
+            ),
+            "hpconfig3"=>array(
+                "name"=>"Pulse Count + Kamstrup 402 MBUS", 
+                "image"=>"HeatpumpMonitor.png", 
+                "inputprocessing"=>array(
+                    "WattHours"=>array(
+                        array("process"=>"multiply", "value"=>0.001),
+                        array("process"=>"wh_accumulator", "feedname"=>"heatpump_elec_kwh")
+                    ),
+                    "KSheat"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_heat"),
+                        array("process"=>"power_to_kwh", "feedname"=>"heatpump_heat_kwh")
+                    ),
+                    "KSflowT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_flowT")
+                    ),
+                    "KSreturnT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"heatpump_returnT")
+                    ),
+                    "KSkWh"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"KSkWh")
+                    )
+                )
+            )
+        )
+    );
 
     return $devices;
 }
