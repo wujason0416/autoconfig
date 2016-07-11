@@ -61,7 +61,7 @@ function get_devices() {
         "name"=>"Heatpump Monitor",
         "description"=>"ESP WIFI Heatpump Monitor",
         "nodename"=>"0",
-        "inputnames"=>array("OEMct1","OEMct1Wh","KSheat","KSflowT","KSreturnT","KSkWh","WattHours"),
+        "inputnames"=>array("OEMct1","OEMct1Wh","KSheat","KSflowT","KSreturnT","KSkWh","PulseIRDA"),
         "inputs"=>array(),
         // Available configurations
         "configurations"=>array(
@@ -96,7 +96,7 @@ function get_devices() {
                 "name"=>"Elster A100C IRDA + Kamstrup 402 MBUS", 
                 "image"=>"HeatpumpMonitor.png", 
                 "inputprocessing"=>array(
-                    "WattHours"=>array(
+                    "PulseIRDA"=>array(
                         array("process"=>"multiply", "value"=>0.001),
                         array("process"=>"wh_accumulator", "feedname"=>"heatpump_elec_kwh")
                     ),
@@ -119,7 +119,7 @@ function get_devices() {
                 "name"=>"Pulse Count + Kamstrup 402 MBUS", 
                 "image"=>"HeatpumpMonitor.png", 
                 "inputprocessing"=>array(
-                    "WattHours"=>array(
+                    "PulseIRDA"=>array(
                         array("process"=>"multiply", "value"=>0.001),
                         array("process"=>"wh_accumulator", "feedname"=>"heatpump_elec_kwh")
                     ),
