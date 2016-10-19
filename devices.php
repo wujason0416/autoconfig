@@ -140,6 +140,49 @@ function get_devices() {
             )
         )
     );
+    
+    $devices["openevse"] = array(
+        "name"=>"OpenEVSE",
+        "description"=>"OpenEVSE Charging Station",
+        "nodename"=>"5",
+        "inputnames"=>array("OpenEVSE_AMP","OpenEVSE_TEMP1","OpenEVSE_TEMP2","OpenEVSE_TEMP3","OpenEVSE_PILOT","OpenEVSE_STATE"),
+        "inputs"=>array(),
+        // Available configurations
+        "configurations"=>array(
+            // Home Energy Monitoring 
+            "default"=>array(
+                "name"=>"OpenEVSE", 
+                "image"=>"openevse.png", 
+                "inputprocessing"=>array(
+                    "OpenEVSE_AMP"=>array(
+                        array("process"=>"multiply", "value"=>0.001),
+                        array("process"=>"multiply", "value"=>240.0),
+                        array("process"=>"log_to_feed", "feedname"=>"OpenEVSE_POWER"),
+                        array("process"=>"power_to_kwh", "feedname"=>"OpenEVSE_KWH")
+                    ),
+                    "OpenEVSE_TEMP1"=>array(
+                        array("process"=>"multiply", "value"=>0.1),
+                        array("process"=>"log_to_feed", "feedname"=>"OpenEVSE_TEMP1")
+                    ),
+                    "OpenEVSE_TEMP2"=>array(
+                        array("process"=>"multiply", "value"=>0.1),
+                        array("process"=>"log_to_feed", "feedname"=>"OpenEVSE_TEMP2")
+                    ),
+                    "OpenEVSE_TEMP3"=>array(
+                        array("process"=>"multiply", "value"=>0.1),
+                        array("process"=>"log_to_feed", "feedname"=>"OpenEVSE_TEMP3")
+                    ),
+                    "OpenEVSE_PILOT"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"OpenEVSE_PILOT")
+                    ),
+                    "OpenEVSE_STATE"=>array(
+                        array("process"=>"log_to_feed", "feedname"=>"OpenEVSE_STATE")
+                    )
+                ),
+                "dashboards"=>array("myopenevse")
+            )
+        )
+    );
 
     return $devices;
 }

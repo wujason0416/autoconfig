@@ -230,7 +230,7 @@ class AutoConfig
                                     // Check to see if feed exists
                                     if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
                                         $log .= "- creating feed ".$process['feedname'].": ";
-                                        $result = $this->feed->create($userid,"",$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        $result = $this->feed->create($userid,$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
                                         if ($result["success"]) {
                                             $log .= "ok\n";
                                             $feedid = $result["feedid"];
@@ -248,7 +248,7 @@ class AutoConfig
                                     // Check to see if feed exists
                                     if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
                                         $log .= "- creating feed ".$process['feedname'].": ";
-                                        $result = $this->feed->create($userid,"",$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        $result = $this->feed->create($userid,$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
                                         if ($result["success"]) {
                                             $log .= "ok\n";
                                             $feedid = $result["feedid"];
@@ -266,7 +266,7 @@ class AutoConfig
                                     // Check to see if feed exists
                                     if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
                                         $log .= "- creating feed ".$process['feedname'].": ";
-                                        $result = $this->feed->create($userid,"",$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        $result = $this->feed->create($userid,$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
                                         if ($result["success"]) {
                                             $log .= "ok\n";
                                             $feedid = $result["feedid"];
