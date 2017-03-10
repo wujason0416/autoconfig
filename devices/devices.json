@@ -1,4 +1,12 @@
 {
+    "emonpi": {
+        "name": "EmonPi",
+        "description": "RaspberryPI based energy monitoring base station",
+        "nodename": "emonpi",
+        "inputnames": ["power1","power2","power1pluspower2","vrms","t1","t2","t3","t4","t5","t6","pulsecount","rssi"],
+        "inputs": [],
+        "configurations": { }
+    },
     "emontx_v3": {
         "name": "EmonTx v3",
         "description": "Energy Monitoring Node",
