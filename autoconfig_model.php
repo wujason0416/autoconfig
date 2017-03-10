@@ -47,7 +47,7 @@ class AutoConfig
             
             foreach ($devices as $devicekey=>$device) {
                 // Check if device has been configured
-                $devices[$devicekey]["configured"] = false;
+                $devices->$devicekey->configured = false;
                 
                 $stmt = $this->mysqli->prepare("SELECT configuration FROM autoconfig WHERE device=? AND userid=?");
                 $stmt->bind_param("si", $devicekey, $userid);
@@ -58,14 +58,14 @@ class AutoConfig
                     $stmt->bind_result($configuration);
                     $stmt->fetch();
                     
-                    $devices[$devicekey]["configured"] = $configuration;
+                    $devices->$devicekey->configured = $configuration;
                 }
                 $stmt->close();
                 
                 // Load device inputs if present
-                foreach ($devices[$devicekey]["inputnames"] as $inputname) {
-                    if ($devices[$devicekey]["nodename"]==$node && $inputname==$name) {
-                        $devices[$devicekey]["inputs"][$inputname] = array("id"=>$inp->id,"processList"=>$inp->processList);
+                foreach ($devices->$devicekey->inputnames as $inputname) {
+                    if ($devices->$devicekey->nodename==$node && $inputname==$name) {
+                        $devices->$devicekey->inputs[$inputname] = array("id"=>$inp->id,"processList"=>$inp->processList);
                     }
                 }
             }
@@ -73,16 +73,16 @@ class AutoConfig
 
         // Check if device inputs match user inputs
         foreach ($devices as $devicekey=>$device) {
-            $devices[$devicekey]["detected"] = true;
-            foreach ($devices[$devicekey]["inputnames"] as $inputname) {
-                if (!isset($devices[$devicekey]["inputs"][$inputname])) $devices[$devicekey]["detected"] = false;
+            $devices->$devicekey->detected = true;
+            foreach ($devices->$devicekey->inputnames as $inputname) {
+                if (!isset($devices->$devicekey->inputs[$inputname])) $devices->$devicekey->detected = false;
             }
         }
         
         $devices = $this->verify($userid,$devices);
         
         foreach ($devices as $devicekey=>$device) {
-            if ($devices[$devicekey]["detected"]) $detected_devices[$devicekey] = $devices[$devicekey];
+            if ($devices->$devicekey->detected) $detected_devices[$devicekey] = $devices->$devicekey;
         }
         
         return $detected_devices;
@@ -97,53 +97,53 @@ class AutoConfig
         foreach ($devices as $devicekey=>$device) {
             $verify = true;
             $verifylog = "";
-            if ($devices[$devicekey]["detected"]) {
-                $selected_config = $devices[$devicekey]["configured"];
+            if ($devices->$devicekey->detected) {
+                $selected_config = $devices->$devicekey->configured;
                 if ($selected_config) {
-                    $configuration = $device["configurations"][$selected_config];
+                    $configuration = $device->configurations->$selected_config;
                     
-                    foreach ($device["inputs"] as $inputname=>$inp) {
+                    foreach ($device->inputs as $inputname=>$inp) {
                         $processlist = explode(",",$inp['processList']);
                     
-                        if (isset($configuration["inputprocessing"][$inputname])) {
+                        if (isset($configuration->inputprocessing->$inputname)) {
                             $i = 0;
-                            foreach ($configuration["inputprocessing"][$inputname] as $process) 
+                            foreach ($configuration->inputprocessing->$inputname as $process) 
                             { 
                                 if (isset($processlist[$i]) && $processlist[$i]!=null) {
                                     $processparts = explode(":",$processlist[$i]);
                                     $processid = $processparts[0];
                                     
-                                    if ($process['process']=="log_to_feed") {
+                                    if ($process->process=="log_to_feed") {
                                         if ($processid!=1) { $verify = false; $verifylog .= "- Expected log_to_feed (1) found processid:$processid<br>"; }
                                     }
-                                    if ($process['process']=="wh_accumulator") {
+                                    if ($process->process=="wh_accumulator") {
                                         if ($processid!=34) { $verify = false; $verifylog .= "- Expected wh_accumulator (34) found processid:$processid<br>"; }
                                     }
-                                    if ($process['process']=="power_to_kwh") {
+                                    if ($process->process=="power_to_kwh") {
                                         if ($processid!=4) { $verify = false; $verifylog = "- Expected power_to_kwh (4) found processid:$processid<br>"; }
                                     }
-                                    if ($process['process']=="subtract_input") {
+                                    if ($process->process=="subtract_input") {
                                         if ($processid!=22) { $verify = false; $verifylog .= "- Expected subtract_input (22) found processid:$processid<br>"; } 
                                     }
-                                    if ($process['process']=="allow_positive") {
+                                    if ($process->process=="allow_positive") {
                                         if ($processid!=24) { $verify = false; $verifylog .= "- Expected allow_positive (44) found processid:$processid<br>"; } 
                                     }
-                                    if ($process['process']=="multiply") {
+                                    if ($process->process=="multiply") {
                                         if ($processid!=2) { $verify = false; $verifylog .= "- Expected multiply (2) found processid:$processid<br>"; } 
                                     }
                                 } else {
                                     $verify = false;
-                                    $verifylog .= "- Missing process <b>".$process['process']."</b> on input <b>$inputname</b><br>"; 
+                                    $verifylog .= "- Missing process <b>".$process->process."</b> on input <b>$inputname</b><br>"; 
                                 }
                                 
-                                if ($process['process']=="log_to_feed") { 
-                                    if (!$this->feed->get_id($userid,$process['feedname'])) { $verify = false; $verifylog .= "- Missing feed <b>".$process['feedname']."</b><br>"; } 
+                                if ($process->process=="log_to_feed") { 
+                                    if (!$this->feed->get_id($userid,$process->feedname)) { $verify = false; $verifylog .= "- Missing feed <b>".$process->feedname."</b><br>"; } 
                                 }
-                                if ($process['process']=="wh_accumulator") { 
-                                    if (!$this->feed->get_id($userid,$process['feedname'])) { $verify = false; $verifylog .= "- Missing feed <b>".$process['feedname']."</b><br>"; } 
+                                if ($process->process=="wh_accumulator") { 
+                                    if (!$this->feed->get_id($userid,$process->feedname)) { $verify = false; $verifylog .= "- Missing feed <b>".$process->feedname."</b><br>"; } 
                                 }
-                                if ($process['process']=="power_to_kwh") {
-                                    if (!$this->feed->get_id($userid,$process['feedname'])) { $verify = false; $verifylog .= "- Missing feed <b>".$process['feedname']."</b><br>"; } 
+                                if ($process->process=="power_to_kwh") {
+                                    if (!$this->feed->get_id($userid,$process->feedname)) { $verify = false; $verifylog .= "- Missing feed <b>".$process->feedname."</b><br>"; } 
                                 }
                                 
                                 $i++;
@@ -152,8 +152,8 @@ class AutoConfig
                     }
                 }
             }
-            $devices[$devicekey]["verified"] = $verify;
-            $devices[$devicekey]["verifylog"] = $verifylog;
+            $devices->$devicekey->verified = $verify;
+            $devices->$devicekey->verifylog = $verifylog;
         }
         
         return $devices;
@@ -194,7 +194,7 @@ class AutoConfig
         
         $devices = $this->get_device_list($userid);
         $inputs = $this->input->getlist($userid);
-        $devices[$device]["selected_config"] = $configuration;
+        $devices[$device]->selected_config = $configuration;
         
         $log = "";
         
@@ -202,13 +202,14 @@ class AutoConfig
         // For each present device with configuration set
         // ------------------------------------------------------------------------------------------------------------------------------------------------------
         foreach ($devices as $devicekey=>$device) {
-            if ($device["detected"] && isset($device["selected_config"])) {
+            if ($device->detected && isset($device->selected_config)) {
             
                 // Load device configuration
-                $configuration = $device["configurations"][$device["selected_config"]];
+                $selconf = $device->selected_config;
+                $configuration = $device->configurations->$selconf;
                 
                 // for each of the device inputs
-                foreach ($device["inputs"] as $inputname=>$inp) {
+                foreach ($device->inputs as $inputname=>$inp) {
                     $log .= $devicekey." ".$inputname." ".$inp['id']."\n";
                     
                     if ($inp['processList']!="") {
@@ -220,89 +221,104 @@ class AutoConfig
                     if ($inp['processList']=="") {
                         
                         // Load processes for input
-                        if (isset($configuration["inputprocessing"][$inputname])) {
-                            foreach ($configuration["inputprocessing"][$inputname] as $process) 
+                        if (isset($configuration->inputprocessing->$inputname)) {
+                            foreach ($configuration->inputprocessing->$inputname as $process) 
                             {   
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // Log to feed
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-                                if ($process['process']=="log_to_feed") {
+                                if ($process->process=="log_to_feed") {
                                     // Check to see if feed exists
-                                    if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
-                                        $log .= "- creating feed ".$process['feedname'].": ";
-                                        $result = $this->feed->create($userid,$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
-                                        if ($result["success"]) {
+                                    if (!$feedid = $this->feed->get_id($userid,$process->feedname)) {
+                                        $log .= "- creating feed ".$process->feedname.": ";
+                                        
+                                        // local emoncms
+                                        $result = $this->feed->create($userid,"",$process->feedname,DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        // emoncms.org
+                                        // $result = $this->feed->create($userid,$process->feedname,DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
+                                        
+                                        if ($result->success) {
                                             $log .= "ok\n";
-                                            $feedid = $result["feedid"];
+                                            $feedid = $result->feedid;
                                         }
                                     }
                                     $log .= "- add log_to_feed process to input: ";
                                     $result = $this->process_add($this->input,$inp['id'],1,$feedid); // processid:1 Log to feed
-                                    if ($result["success"]) $log .= "ok\n";
+                                    if ($result->success) $log .= "ok\n";
                                 }
                                 
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // Log to feed
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-                                if ($process['process']=="wh_accumulator") {
+                                if ($process->process=="wh_accumulator") {
                                     // Check to see if feed exists
-                                    if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
-                                        $log .= "- creating feed ".$process['feedname'].": ";
-                                        $result = $this->feed->create($userid,$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
-                                        if ($result["success"]) {
+                                    if (!$feedid = $this->feed->get_id($userid,$process->feedname)) {
+                                        $log .= "- creating feed ".$process->feedname.": ";
+                                        
+                                        // local emoncms
+                                        $result = $this->feed->create($userid,"",$process->feedname,DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        // emoncms.org
+                                        // $result = $this->feed->create($userid,$process->feedname,DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
+                                        
+                                        if ($result->success) {
                                             $log .= "ok\n";
-                                            $feedid = $result["feedid"];
+                                            $feedid = $result->feedid;
                                         }
                                     }
                                     $log .= "- add wh_accumulator process to input: ";
                                     $result = $this->process_add($this->input,$inp['id'],34,$feedid); // processid:34 wh_accumulator
-                                    if ($result["success"]) $log .= "ok\n";
+                                    if ($result->success) $log .= "ok\n";
                                 }
                                 
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // power to kwh
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-                                if ($process['process']=="power_to_kwh") {
+                                if ($process->process=="power_to_kwh") {
                                     // Check to see if feed exists
-                                    if (!$feedid = $this->feed->get_id($userid,$process['feedname'])) {
-                                        $log .= "- creating feed ".$process['feedname'].": ";
-                                        $result = $this->feed->create($userid,$process['feedname'],DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
-                                        if ($result["success"]) {
+                                    if (!$feedid = $this->feed->get_id($userid,$process->feedname)) {
+                                        $log .= "- creating feed ".$process->feedname.": ";
+                                        
+                                        // local emoncms
+                                        $result = $this->feed->create($userid,"",$process->feedname,DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10));
+                                        // emoncms.org
+                                        // $result = $this->feed->create($userid,$process->feedname,DataType::REALTIME,Engine::PHPFINA,(object) array("interval"=>10),0);
+                                        
+                                        if ($result->success) {
                                             $log .= "ok\n";
-                                            $feedid = $result["feedid"];
+                                            $feedid = $result->feedid;
                                         }
                                     }
                                     $log .= "- add power_to_kwh process to input: ";
                                     $result = $this->process_add($this->input,$inp['id'],4,$feedid); // processid:4 power_to_kwh
-                                    if ($result["success"]) $log .= "ok\n";
+                                    if ($result->success) $log .= "ok\n";
                                 }
                                 
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // subtract input
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-                                if ($process['process']=="subtract_input") {
+                                if ($process->process=="subtract_input") {
                                     $log .= "- add subtract_input process to input: ";
-                                    $input_to_subtract = $device["inputs"][$process["inputname"]]["id"];
+                                    $input_to_subtract = $device->inputs[$process->inputname]->id;
                                     $result = $this->process_add($this->input,$inp['id'],22,$input_to_subtract);
-                                    if ($result["success"]) $log .= "ok\n";
+                                    if ($result->success) $log .= "ok\n";
                                 }
                                 
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // allow_positive
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-                                if ($process['process']=="allow_positive") {
+                                if ($process->process=="allow_positive") {
                                     $log .= "- add allow_positive process to input: ";
                                     $result = $this->process_add($this->input,$inp['id'],24,null);
-                                    if ($result["success"]) $log .= "ok\n";
+                                    if ($result->success) $log .= "ok\n";
                                 }
                                 
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
                                 // multiply
                                 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-                                if ($process['process']=="multiply") {
+                                if ($process->process=="multiply") {
                                     $log .= "- add multiply process to input: ";
-                                    $result = $this->process_add($this->input,$inp['id'],2,$process["value"]);
-                                    if ($result["success"]) $log .= "ok\n";
+                                    $result = $this->process_add($this->input,$inp['id'],2,$process->value);
+                                    if ($result->success) $log .= "ok\n";
                                 }
                                 
                             } // foreach process

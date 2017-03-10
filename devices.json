@@ -1,0 +1,184 @@
+{
+    "emontx_v3": {
+        "name": "EmonTx v3",
+        "description": "Energy Monitoring Node",
+        "nodename": "10",
+        "inputnames": ["1","2","3"],
+        "inputs": [],
+        "configurations": {
+            "home": {
+                "name": "Home Energy Monitor",
+                "image": "HomeEnergySmall.png",
+                "inputprocessing": {
+                    "1": [
+                        { "process": "log_to_feed", "feedname": "use" },
+                        { "process": "power_to_kwh", "feedname": "use_kwh" }
+                    ]
+                },
+                "dashboards": ["myelectric"]
+            },
+            "solar": {
+                "name": "Solar PV",
+                "image": "SolarEnergySmall.png",
+                "inputprocessing": {
+                    "1": [
+                        { "process": "log_to_feed", "feedname": "use" },
+                        { "process": "power_to_kwh", "feedname": "use_kwh" },
+                        { "process": "subtract_input", "inputname": "2" },
+                        { "process": "allow_positive" },
+                        { "process": "log_to_feed", "feedname": "import" },
+                        { "process": "power_to_kwh", "feedname": "import_kwh" }
+                    ],
+                    "2": [
+                        { "process": "log_to_feed", "feedname": "solar" },
+                        { "process": "power_to_kwh", "feedname": "solar_kwh" }
+                    ]
+                },
+                "dashboards": ["myelectric","mysolarpv"]
+            }
+        }
+    },
+    "emonth": {
+        "name": "EmonTH",
+        "description": "Room temperature and humidity node",
+        "nodename": "18",
+        "inputnames": ["1","2"],
+        "inputs": [],
+        "configurations": {
+            "default": {
+                "name": "default",
+                "image": "emonth.png",
+                "inputprocessing": {
+                    "1": [
+                        { "process": "log_to_feed", "feedname": "temperature" }
+                    ],
+                    "2": [
+                        { "process": "log_to_feed", "feedname": "humidity" }
+                    ]
+                },
+                "dashboards": []
+            }
+        }
+    },
+    "heatpumpmonitor": {
+        "name": "Heatpump Monitor",
+        "description": "ESP WIFI Heatpump Monitor",
+        "nodename": "0",
+        "inputnames": ["OEMct1","OEMct1Wh","KSheat","KSflowT","KSreturnT","KSkWh","PulseIRDA"],
+        "inputs": [],
+        "configurations": {
+            "hpconfig1": {
+                "name": "OEM CT1 + Kamstrup 402 MBUS",
+                "image": "HeatpumpMonitor.png",
+                "inputprocessing": {
+                    "OEMct1": [
+                        { "process": "log_to_feed", "feedname": "heatpump_elec" }
+                    ],
+                    "OEMct1Wh": [
+                        { "process": "multiply", "value": 0.001 },
+                        { "process": "wh_accumulator", "feedname": "heatpump_elec_kwh" }
+                    ],
+                    "KSheat": [
+                        { "process": "log_to_feed", "feedname": "heatpump_heat" },
+                        { "process": "power_to_kwh", "feedname": "heatpump_heat_kwh" }
+                    ],
+                    "KSflowT": [
+                        { "process": "log_to_feed", "feedname": "heatpump_flowT" }
+                    ],
+                    "KSreturnT": [
+                        { "process": "log_to_feed", "feedname": "heatpump_returnT" }
+                    ],
+                    "KSkWh": [
+                        { "process": "log_to_feed", "feedname": "KSkWh" }
+                    ]
+                }
+            },
+            "hpconfig2": {
+                "name": "Elster A100C IRDA + Kamstrup 402 MBUS",
+                "image": "HeatpumpMonitor.png",
+                "inputprocessing": {
+                    "PulseIRDA": [
+                        { "process": "multiply", "value": 0.001 },
+                        { "process": "wh_accumulator", "feedname": "heatpump_elec_kwh" }
+                    ],
+                    "KSheat": [
+                        { "process": "log_to_feed", "feedname": "heatpump_heat" },
+                        { "process": "power_to_kwh", "feedname": "heatpump_heat_kwh" }
+                    ],
+                    "KSflowT": [
+                        { "process": "log_to_feed", "feedname": "heatpump_flowT" }
+                    ],
+                    "KSreturnT": [
+                        { "process": "log_to_feed", "feedname": "heatpump_returnT" }
+                    ],
+                    "KSkWh": [
+                        { "process": "log_to_feed", "feedname": "KSkWh" }
+                    ]
+                }
+            },
+            "hpconfig3": {
+                "name": "Pulse Count + Kamstrup 402 MBUS",
+                "image": "HeatpumpMonitor.png",
+                "inputprocessing": {
+                    "PulseIRDA": [
+                        { "process": "multiply", "value": 0.001 },
+                        { "process": "wh_accumulator", "feedname": "heatpump_elec_kwh" }
+                    ],
+                    "KSheat": [
+                        { "process": "log_to_feed", "feedname": "heatpump_heat" },
+                        { "process": "power_to_kwh", "feedname": "heatpump_heat_kwh" }
+                    ],
+                    "KSflowT": [
+                        { "process": "log_to_feed", "feedname": "heatpump_flowT" }
+                    ],
+                    "KSreturnT": [
+                        { "process": "log_to_feed", "feedname": "heatpump_returnT" }
+                    ],
+                    "KSkWh": [
+                        { "process": "log_to_feed", "feedname": "KSkWh" }
+                    ]
+                }
+            }
+        }
+    },
+    "openevse": {
+        "name": "OpenEVSE",
+        "description": "OpenEVSE Charging Station",
+        "nodename": "5",
+        "inputnames": ["OpenEVSE_AMP","OpenEVSE_TEMP1","OpenEVSE_TEMP2","OpenEVSE_TEMP3","OpenEVSE_PILOT","OpenEVSE_STATE"],
+        "inputs": [],
+        "configurations": {
+            "default": {
+                "name": "OpenEVSE",
+                "image": "openevse.png",
+                "inputprocessing": {
+                    "OpenEVSE_AMP": [
+                        { "process": "multiply", "value": 0.001 },
+                        { "process": "multiply", "value": 240 },
+                        { "process": "log_to_feed", "feedname": "OpenEVSE_POWER" },
+                        { "process": "power_to_kwh", "feedname": "OpenEVSE_KWH" }
+                    ],
+                    "OpenEVSE_TEMP1": [
+                        { "process": "multiply", "value": 0.1 },
+                        { "process": "log_to_feed", "feedname": "OpenEVSE_TEMP1" }
+                    ],
+                    "OpenEVSE_TEMP2": [
+                        { "process": "multiply", "value": 0.1 },
+                        { "process": "log_to_feed", "feedname": "OpenEVSE_TEMP2" }
+                    ],
+                    "OpenEVSE_TEMP3": [
+                        { "process": "multiply", "value": 0.1 },
+                        { "process": "log_to_feed", "feedname": "OpenEVSE_TEMP3" }
+                    ],
+                    "OpenEVSE_PILOT": [
+                        { "process": "log_to_feed", "feedname": "OpenEVSE_PILOT" }
+                    ],
+                    "OpenEVSE_STATE": [
+                        { "process": "log_to_feed", "feedname": "OpenEVSE_STATE" }
+                    ]
+                },
+                "dashboards": ["myopenevse"]
+            }
+        }
+    }
+}
