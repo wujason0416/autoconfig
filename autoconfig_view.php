@@ -84,7 +84,7 @@ function load()
                 out += "    <div style='clear:both'></div>";
                 out += "  </div>";
                 
-                out += "</div>";
+                out += "</div><br>";
             }
             
             $("#devices").html(out);
